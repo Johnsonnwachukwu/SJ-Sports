@@ -186,11 +186,11 @@
         <div class="hero-note"><span class="note-dot"></span> Easy ordering · Direct WhatsApp contact</div>
       </div>
       <div class="hero-visual" id="heroSlideshow" aria-label="Featured S.J Sports football kits">
-        <img class="is-active" src="liverpool girl.png" alt="Model wearing a Chelsea football jersey" />
+        <img class="is-active" src="real girl.png" alt="Original real jersey" />
         <img src="chealsea boy.png" alt="Chelsea football jersey" />
         <img src="man U girl.png" alt="manchester United football jersey" />
-        <img src="beyern Munchen boy.png" alt="Bayern football jersey" />
-        <img src="chelsae 5.png" alt="Manchester United football jersey" />
+        <img src="madrid pink.png" alt="classic real madrid jersey" />
+        <img src="chelsae 5.png" alt="Football jersey collection" />
         <img src="Niaja woman.png" alt="Classic Nigeria football jersey" />
         <div class="hero-sticker">MATCH DAY<br>ESSENTIALS</div>
         <div class="hero-caption"><div><strong id="heroCaptionTitle"></strong><span id="heroCaptionText">Find your next favourite kit.</span></div><span class="round-arrow">↗</span></div>
@@ -278,7 +278,7 @@
       { id: 14, name: "Nike air Vapor Boot", category: "boots", price: 45000, tag: "Training", description: "Built for speed and ball control.", image: "puple vapor.jpg" },
       { id: 15, name: "Goalkeeper gloves", category: "accessories", price: 10000, tag: "Keeper pick", description: "Stand out between the posts.", image: "Goalkeeper.jpg", maleImage: "Goalkeeper Man Mockup.png", femaleImage: "Goalkeeper Woman Mockup.png" },
       { id: 16, name: "Football Socks", category: "accessories", price: 3500, tag: "Essential", description: "Comfortable support for match day.", image: "Refree cards.jpg" },
-      { id: 17, name: "Fifa yellow card & red card", category: "accessories", price: 2000, tag: "Sport accessory", description: "Control your players.", image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=85" },
+      { id: 17, name: "Fifa yellow card & red card", category: "accessories", price: 2000, tag: "Sport accessory", description: "Control your players.", image: "Refree cards.jpg" },
       { id: 18, name: "Match-Day Football", category: "accessories", price: 10000, tag: "Game on", description: "Bring the game to your training ground.", image: "https://images.unsplash.com/photo-1614632537190-23e4146777db?auto=format&fit=crop&w=900&q=85" },
       { id: 19, name: "Captian Arm Band", category: "accessories", price: 4000, tag: "Captian", description: "Control your team.", image: "Captain arm band.jpg" },
       { id: 20, name: "F50 Football Boot", category: "boots", price: 45000, tag: "Best for training", description: "Built for training, speed and control.", image: "F50 Football Boot.png" },
@@ -291,6 +291,42 @@
     const modal = document.getElementById("orderModal");
     let selectedProduct = null;
     const naira = value => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(value);
+
+    // Try known filename variations before showing the placeholder. File names on
+    // Cloudflare Pages are case-sensitive, so capitalization and spelling matter.
+    const imageAlternatives = {
+      "Chelsea Jersey Mockup.png": ["Chelsea Jersey Mockup.png", "chelsea jersey mockup.png", "Chelsea jersey mockup.png"],
+      "Madrid Jersey Mockup.png": ["Madrid Jersey Mockup.png", "madrid jersey mockup.png", "Real Madrid Jersey Mockup.png"],
+      "Arsenal Mockup.png": ["Arsenal Mockup.png", "arsenal mockup.png", "Arsenal mock up.png"],
+      "man u mockup.png": ["man u mockup.png", "Man U mockup.png", "Man U Mockup.png", "man U mockup.png", "Manchester United Mockup.png"],
+      "Nigeria mockup.png": ["Nigeria mockup.png", "Nigeria Mockup.png", "nigeria mockup.png", "Classic Nigerian Jersey.png", "classic Nigerian Jersey.png"],
+      "Liverpool.png": ["Liverpool.png", "liverpool.png", "Liverpool Mockup.png"],
+      "Classic madrid.png": ["Classic madrid.png", "classic madrid.png", "Classic Madrid.png", "Classic Real Madrid.png"],
+      "Bayern Munchen.png": ["Bayern Munchen.png", "bayern munchen.png", "Bayern München.png", "Bayern Munich.png"],
+      "Barcelona.png": ["Barcelona.png", "barcelona.png", "Barcelona Mockup.png"],
+      "Man city mockup.png": ["Man city mockup.png", "Man City Mockup.png", "man city mockup.png", "Manchester City Mockup.png"],
+      "liverpool girl.png": ["liverpool girl.png", "Liverpool girl.png", "Liverpool Girl.png"],
+      "chealsea boy.png": ["chealsea boy.png", "Chelsea boy.png", "chelsea boy.png"],
+      "man U girl.png": ["man U girl.png", "Man U girl.png", "Man United girl.png", "Manchester United girl.png"],
+      "beyern Munchen boy.png": ["beyern Munchen boy.png", "Bayern Munchen boy.png", "Bayern Munich boy.png"],
+      "chelsae 5.png": ["chelsae 5.png", "Chelsea 5.png", "chelsea 5.png"],
+      "Niaja woman.png": ["Niaja woman.png", "Nigeria woman.png", "Naija woman.png", "Nigeria Woman.png"]
+    };
+
+    function attachImageFallback(img, originalPath, onFinalError) {
+      const candidates = imageAlternatives[originalPath] || [originalPath];
+      let candidateIndex = 0;
+      img.onerror = () => {
+        candidateIndex += 1;
+        if (candidateIndex < candidates.length) {
+          img.src = candidates[candidateIndex];
+          return;
+        }
+        img.onerror = null;
+        if (onFinalError) onFinalError(img);
+      };
+      img.src = candidates[0];
+    }
 
     function renderProducts(filter = "all") {
       const shown = products.filter(p => filter === "all" || p.category === filter);
@@ -307,6 +343,12 @@
             <div class="product-bottom"><span class="price">${naira(p.price)}</span><button class="order-btn" data-order="${p.id}">Order on WhatsApp ↗</button></div>
           </div>
         </article>`).join("");
+      productGrid.querySelectorAll(".product-image img").forEach(img => {
+        const product = shown.find(p => p.name === img.alt);
+        if (product) attachImageFallback(img, product.image, failedImg => {
+          failedImg.src = "https://placehold.co/700x600/e8eee1/25351f?text=S.J+Sports";
+        });
+      });
       productGrid.querySelectorAll("[data-order]").forEach(button => {
         button.addEventListener("click", () => openOrder(Number(button.dataset.order)));
       });
@@ -330,7 +372,11 @@
         if (product.femaleImage) images.push({ src: product.femaleImage, alt: `${product.name} on a woman` });
       }
       viewerGallery.classList.toggle("single", images.length === 1);
-      viewerGallery.innerHTML = images.map(img => `<figure><img src="${img.src}" alt="${img.alt}" onerror="this.closest('figure').remove();" /></figure>`).join("");
+      viewerGallery.innerHTML = images.map(img => `<figure><img data-image-path="${img.src}" alt="${img.alt}" /></figure>`).join("");
+      viewerGallery.querySelectorAll("img[data-image-path]").forEach(img => {
+        const originalPath = img.dataset.imagePath;
+        attachImageFallback(img, originalPath, failedImg => failedImg.closest("figure")?.remove());
+      });
       imageViewer.classList.add("open");
       document.body.style.overflow = "hidden";
     }
@@ -428,12 +474,18 @@
     // Hero slideshow: six images, one at a time, looping automatically.
     // Keep these image files in the same folder as this HTML file.
     const heroSlides = Array.from(document.querySelectorAll("#heroSlideshow > img"));
+    heroSlides.forEach(slide => {
+      const originalPath = slide.getAttribute("src");
+      attachImageFallback(slide, originalPath, failedImg => {
+        failedImg.style.display = "none";
+      });
+    });
     const heroProgress = Array.from(document.querySelectorAll("#heroProgress span"));
     const heroTitles = [
-      ["Ready for kickoff?", "Find your next favourite kit."],
-      ["Blue is the colour.", "Rep your club on match day."],
-      ["Bring the united spirit.", "Discover your next machester united look."],
-      ["Stand out on match day.", "Show your colours with pride."],
+      ["wear your team colours", "Find your next favourite kit."],
+      ["wear your team colours.", "Rep your club on match day."],
+      ["wear your team colours.", "Discover your next machester united look."],
+      ["wear your team colours.", "Show your colours with pride."],
       ["Wear your team colours.", "Find the kit that fits your game."],
       ["Proudly wear the green.", "Celebrate the beautiful game in Country colors."]
     ];
